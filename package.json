@@ -1,0 +1,23 @@
+{
+	"name": "self-grader",
+	"version": "1.0.1",
+	"description": "run test command with given stdin and expecting correct stdout",
+	"main": "cli.mjs",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node cli.mjs"
+	},
+	"keywords": [
+		"testing",
+		"grader",
+		"coding"
+	],
+	"author": "MrYellowSock",
+	"license": "ISC",
+	"bin": "./cli.mjs",
+	"dependencies": {
+		"chalk": "^5.0.1",
+		"commander": "^9.4.0",
+		"diff": "^5.1.0"
+	}
+}
