@@ -2,7 +2,7 @@
 import path from 'path'
 import fs from 'fs';
 import {Command} from 'commander';
-import {grade} from './grading.mjs';
+import {grader} from './grading.mjs';
 
 import myPack from "./package.json" assert {type: "json"};
 let {name, version, description} = myPack
@@ -32,8 +32,7 @@ program
 		}
 
 		const gradeAction = () => {
-			const gr = grade(command, fs.readFileSync(testcasefile_path).toString(), +options.timeout)
-			console.log('Your score :', gr)
+			grader(command, fs.readFileSync(testcasefile_path).toString(), +options.timeout)
 		}
 		if (options.reload.length > 0) {
 			fs.watchFile(options.reload, {persistent: true, interval: 500}, (cur, prev) => {
