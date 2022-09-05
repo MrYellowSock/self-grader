@@ -143,6 +143,7 @@ export async function grader(testCommand, testCaseFileContent, timeout) {
 	const [executable, ...args] = testCommand.split(' ').filter(a => a.length > 0)
 
 	const cases = stringToCases(testCaseFileContent)
+	console.clear()
 	console.log(cases.length, 'cases loaded')
 	console.log("spawn command is:", executable, args)
 	printSummary(await grade(executable, args, cases, timeout))
