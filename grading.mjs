@@ -1,19 +1,29 @@
 import chalk from 'chalk';
 import {spawn, spawnSync} from 'child_process'
-import {diffChars} from 'diff'
+import {diffChars, diffWords} from 'diff'
 
 /**
  * @param {string} expectation
  * @param {string} reality
  */
 function printDiff(expectation, reality) {
-	console.log(chalk.blue(expectation))
-	console.log(chalk.white(reality))
-	//    diffChars(expectation, reality).forEach(part => {
-	//        const color = part.added ? chalk.bgRed :
-	//            part.removed ? chalk.bgGray : chalk.green;
-	//        process.stderr.write(color(part.value));
-	//    })
+	let panes = [[], []]
+	diffWords(expectation, reality).forEach(part => {
+		if (part.added) {
+			panes[1].push(chalk.green(part.value))
+		}
+		else if (part.removed) { // removed from reality make it red
+			panes[0].push(chalk.red(part.value))
+		}
+		else {
+			panes[0].push(chalk.blue(part.value))
+			panes[1].push(chalk.white(part.value))
+		}
+		// console.log(part)
+	})
+	panes.forEach(pane => {
+		console.log(pane.join(''))
+	})
 }
 
 /**
@@ -60,8 +70,6 @@ function forkProgram(input, executable, args, timeout) {
 			timeout: timeout,
 		})
 
-		proc.stdin.write(input)
-		proc.stdin.end()
 		proc.on('error', (err) => {
 			resolve({stdouterr, error: err})
 		})
@@ -73,6 +81,8 @@ function forkProgram(input, executable, args, timeout) {
 		proc.stdout.on('data', (chunk) => {
 			stdouterr += chunk
 		})
+		proc.stdin.write(input)
+		proc.stdin.end()
 
 		proc.on('exit', (code, signal) => {
 			if (signal !== null) { // Terminated by timeout
