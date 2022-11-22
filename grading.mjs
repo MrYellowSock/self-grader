@@ -101,10 +101,18 @@ function forkProgram(input, executable, args, timeout) {
  * @param {string} testCaseFileContent
  * @param {number} timeout
  */
-function grade(executable, args, cases, timeout) {
-	return Promise.all(cases.map(({inputs}) =>
+function grade(executable, args, cases, timeout, asyncMode = false) {
+	const syncForks = async () => {
+		let all = []
+		for (let {inputs} of cases) {
+			all.push(await forkProgram(inputs.join('\n'), executable, args, timeout))
+		}
+		return all
+	}
+	const asyncFork = () => Promise.all(cases.map(({inputs}) =>
 		forkProgram(inputs.join('\n'), executable, args, timeout)
-	)).then(
+	))
+	return (asyncMode ? asyncFork : syncForks)().then(
 		res => res.map(({stdouterr, error}, index) => {
 			return {stdouterr, error, ...cases[index]}
 		}).map(({stdouterr, error, inputs, completeOutput}) => {
@@ -139,12 +147,12 @@ function printSummary(results) {
 	}
 	console.log("Your score:", results.map(r => r.charCode).join(''))
 }
-export async function grader(testCommand, testCaseFileContent, timeout) {
+export async function grader(testCommand, testCaseFileContent, timeout, asyncMode) {
 	const [executable, ...args] = testCommand.split(' ').filter(a => a.length > 0)
 
 	const cases = stringToCases(testCaseFileContent)
 	console.clear()
 	console.log(cases.length, 'cases loaded')
 	console.log("spawn command is:", executable, args)
-	printSummary(await grade(executable, args, cases, timeout))
+	printSummary(await grade(executable, args, cases, timeout, asyncMode))
 }
